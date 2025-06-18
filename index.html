@@ -628,10 +628,22 @@
         
         function updateStats() {
             const now = new Date();
-            const pending = tasks.filter(task => task.status === 'pending').length;
-            const inProgress = tasks.filter(task => task.status === 'in-progress').length;
+            // First, categorize tasks with overdue taking priority
+            const pending = tasks.filter(task => {
+                const isOverdue = new Date(task.dueDate) < now && task.status !== 'completed';
+                return task.status === 'pending' && !isOverdue;
+            }).length;
+            
+            const inProgress = tasks.filter(task => {
+                const isOverdue = new Date(task.dueDate) < now && task.status !== 'completed';
+                return task.status === 'in-progress' && !isOverdue;
+            }).length;
+            
             const completed = tasks.filter(task => task.status === 'completed').length;
-            const overdue = tasks.filter(task => new Date(task.dueDate) < now && task.status !== 'completed').length;
+            
+            const overdue = tasks.filter(task => 
+                new Date(task.dueDate) < now && task.status !== 'completed'
+            ).length;
             
             document.getElementById('pendingCount').textContent = pending;
             document.getElementById('inProgressCount').textContent = inProgress;
